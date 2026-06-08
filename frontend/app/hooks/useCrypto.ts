@@ -155,10 +155,10 @@ export function useCrypto() {
       const plaintext = await window.crypto.subtle.decrypt(
         {
           name: 'AES-GCM',
-          iv: nonce
+          iv: new Uint8Array(nonce)
         },
         sharedSecret.current,
-        ciphertext
+        new Uint8Array(ciphertext)
       );
 
       const decoder = new TextDecoder();
@@ -192,7 +192,9 @@ export function useCrypto() {
 
 // Helper functions
 function arrayBufferToPem(buffer: ArrayBuffer, label: string): string {
-  const base64 = btoa(String.fromCharCode(...new Uint8Array(buffer)));
+  const bytes = new Uint8Array(buffer);
+  const binary = Array.from(bytes, byte => String.fromCharCode(byte)).join('');
+  const base64 = btoa(binary);
   const formatted = base64.match(/.{1,64}/g)?.join('\n') || base64;
   return `-----BEGIN ${label}-----\n${formatted}\n-----END ${label}-----`;
 }
